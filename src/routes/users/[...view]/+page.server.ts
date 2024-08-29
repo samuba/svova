@@ -12,11 +12,9 @@ export const load = (async ({ params: { view } }) => {
     console.log({ view })
 
     if (view === 'new') {
-        //
+        // nothing to do
     } else if (view.match(/\d/)) {
-        console.log("pick one", { view, users: fakeDb.users })
         one = fakeDb.users.find(x => x.id === parseInt(view));
-        console.log({ one })
     } else if (view === 'list') {
         all = fakeDb.users
     } else {

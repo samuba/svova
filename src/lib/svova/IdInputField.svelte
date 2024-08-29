@@ -1,11 +1,11 @@
 <script module lang="ts">
-	export const createIdField = (name: string = 'id') => {
+	export const createIdField = (name: string = 'id', dataType: 'string' | 'number' = 'number') => {
 		const field = {
 			name,
 			hidden: true,
 			readonly: true,
 			elementAttributes: {} as Record<string, string>,
-			exampleValue: '2',
+			exampleValue: dataType === 'number' ? 2 : '2',
 			type: 'id',
 
 			render() {
