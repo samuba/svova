@@ -21,3 +21,11 @@ export function extractFields<T extends FormSchema>(data: FormData, schema: T) {
     }
     return fields as T['FieldsType'];
 }
+
+export type InputFieldProps = {
+    attributes: Record<string, string>;
+    name: string;
+    label: string;
+    helpText: string;
+    value: string;
+}

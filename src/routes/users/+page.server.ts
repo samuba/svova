@@ -1,18 +1,7 @@
-import { extractFields } from '$lib/svova/common';
-import type { Actions, PageServerLoad } from './$types';
-import { formSchema, } from './schema';
+import { redirect } from '@sveltejs/kit';
+import type { PageServerLoad } from './$types';
 
 export const load = (async () => {
-    return {
-        form: formSchema,
-    };
+    redirect(302, '/users/list');
 }) satisfies PageServerLoad;
-
-export const actions = {
-    default: async ({ request }) => {
-        const fields = extractFields(await request.formData(), formSchema);
-
-        console.log("this got posted", { fields });
-    },
-} satisfies Actions;
 

@@ -1,8 +1,11 @@
-import { createNumberField } from "$lib/svova/NumberInputField";
 import { createFieldsType, type FormSchema } from "$lib/svova/common";
-import { createTextField } from "$lib/svova/TextInputField";
+import { createIdField } from "$lib/svova/IdInputField.svelte";
+import { createNumberField } from "$lib/svova/NumberInputField.svelte";
+import { createTextField } from "$lib/svova/TextInputField.svelte";
 
 const fields = {
+    id: createIdField().build(),
+
     email: createTextField(`email`, `Email Address`)
         .max(100)
         .isRequired()
