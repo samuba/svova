@@ -1,0 +1,2 @@
+nova actions -> all entries
+db

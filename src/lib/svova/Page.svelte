@@ -4,14 +4,16 @@
 	import UpdateEntry from '$lib/svova/UpdateEntry.svelte';
 
 	const { data: p } = $props();
+
+	console.log({ data: p });
 </script>
 
 <div class="p-6">
 	{#if p.view === 'new'}
-		<CreateEntry {...p} />
+		<CreateEntry form={p.form} />
 	{:else if p.view === 'list'}
-		<ListEntries {...p} />
+		<ListEntries form={p.form} data={p.data} />
 	{:else if p.view.match(/\d/)}
-		<UpdateEntry {...p} />
+		<UpdateEntry form={p.form} one={p.one} />
 	{/if}
 </div>

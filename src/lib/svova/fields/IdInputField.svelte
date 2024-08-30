@@ -32,10 +32,11 @@
 
 		return field;
 	};
+	export type IdInputField = ReturnType<typeof createIdField>;
 </script>
 
 <script lang="ts">
-	import type { InputFieldProps } from './common';
+	import type { InputFieldProps } from '$lib/svova/common';
 
 	let { attributes, name, label, helpText, value = $bindable() }: InputFieldProps = $props();
 </script>

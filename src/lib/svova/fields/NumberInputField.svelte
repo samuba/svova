@@ -3,15 +3,15 @@
 		const field = {
 			name,
 			label,
-			min: null as number | null,
-			max: null as number | null,
-			step: null as number | null,
-			placeholder: null as string | null,
-			defaultValue: null as number | null,
+			min: undefined as number | undefined,
+			max: undefined as number | undefined,
+			step: undefined as number | undefined,
+			placeholder: undefined as string | undefined,
+			defaultValue: undefined as number | undefined,
 			required: false,
 			readonly: false,
 			hidden: false,
-			helpText: null as string | null,
+			helpText: undefined as string | undefined,
 			exampleValue: 9000,
 			elementAttributes: {} as Record<string, string>,
 			type: 'number',
@@ -95,6 +95,7 @@
 					hidden: this.hidden,
 					helpText: this.helpText,
 					exampleValue: this.exampleValue,
+					elementAttributes: this.elementAttributes,
 					type: this.type
 				};
 			}
@@ -105,7 +106,7 @@
 </script>
 
 <script lang="ts">
-	import type { InputFieldProps } from './common';
+	import type { InputFieldProps } from '$lib/svova/common';
 
 	let { attributes, name, label, helpText, value = $bindable() }: InputFieldProps = $props();
 </script>
