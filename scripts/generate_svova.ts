@@ -3,6 +3,7 @@ import { Select } from "jsr:@cliffy/prompt@^1.0.0-rc.5";
 import { Table } from "jsr:@cliffy/table@^1.0.0-rc.5";
 import * as esbuild from "https://deno.land/x/esbuild@v0.17.11/mod.js";
 import * as path from "https://deno.land/std@0.182.0/path/mod.ts";
+import * as fs from "https://deno.land/std@0.182.0/fs/mod.ts";
 
 async function findSchemaFile(): Promise<string | null> {
     // if present use drizzle config
@@ -90,6 +91,121 @@ async function promptUserForTables(tables: { name: string; columns: { name: stri
     return tables.filter(table => selectedTableNames.includes(table.name));
 }
 
+async function generateDefinitionsFile(table: { name: string; columns: { name: string; type: string; mode?: string; foreignKey?: string }[] }) {
+    const tableName = table.name;
+    const outputDir = `./src/routes/svova-${tableName}`;
+    const outputFile = `${outputDir}/definitions.ts`;
+
+    await fs.ensureDir(outputDir);
+
+    let content = `
+import { extractActionParams, extractFields, finalizeRequest, sleep, type FieldsType, type FormSchema, type Loaders } from "$lib/svova/common";
+import { createIdField } from "$lib/svova/fields/IdInputField.svelte";
+import { createNumberField } from "$lib/svova/fields/NumberInputField.svelte";
+import { createTextField } from "$lib/svova/fields/TextInputField.svelte";
+import { createBooleanField } from "$lib/svova/fields/BooleanInputField.svelte";
+import { createDateField } from "$lib/svova/fields/DateInputField.svelte";
+import { type Actions, type RequestEvent } from "@sveltejs/kit";
+
+const fields = {
+`;
+
+    for (const column of table.columns) {
+        const fieldName = column.name;
+        let fieldDefinition = ``;
+
+        switch (column.type) {
+            case `integer`:
+                if (fieldName === `id`) {
+                    fieldDefinition = `createIdField().build(),`;
+                } else {
+                    fieldDefinition = `createNumberField(\`${fieldName}\`, \`${fieldName.charAt(0).toUpperCase() + fieldName.slice(1)}\`)
+        ${column.mode === `boolean` ? `.asBoolean()` : ``}
+        ${column.mode !== `nullable` ? `.isRequired()` : ``}
+        .build(),`;
+                }
+                break;
+            case `text`:
+                fieldDefinition = `createTextField(\`${fieldName}\`, \`${fieldName.charAt(0).toUpperCase() + fieldName.slice(1)}\`)
+        ${column.mode !== `nullable` ? `.isRequired()` : ``}
+        .build(),`;
+                break;
+            case `real`:
+                fieldDefinition = `createNumberField(\`${fieldName}\`, \`${fieldName.charAt(0).toUpperCase() + fieldName.slice(1)}\`)
+        ${column.mode !== `nullable` ? `.isRequired()` : ``}
+        .build(),`;
+                break;
+            case `boolean`:
+                fieldDefinition = `createBooleanField(\`${fieldName}\`, \`${fieldName.charAt(0).toUpperCase() + fieldName.slice(1)}\`)
+        ${column.mode !== `nullable` ? `.isRequired()` : ``}
+        .build(),`;
+                break;
+            case `timestamp`:
+                fieldDefinition = `createDateField(\`${fieldName}\`, \`${fieldName.charAt(0).toUpperCase() + fieldName.slice(1)}\`)
+        ${column.mode !== `nullable` ? `.isRequired()` : ``}
+        .build(),`;
+                break;
+            default:
+                fieldDefinition = `createTextField(\`${fieldName}\`, \`${fieldName.charAt(0).toUpperCase() + fieldName.slice(1)}\`)
+        ${column.mode !== `nullable` ? `.isRequired()` : ``}
+        .build(),`;
+        }
+
+        content += `    ${fieldName}: ${fieldDefinition}\n`;
+    }
+
+    content += `
+} satisfies FormSchema['fields'];
+
+export const formSchema = {
+    fields,
+    FieldsType: {} as FieldsType<typeof fields>,
+    path: \`/${tableName}\`
+} satisfies FormSchema;
+
+export type FormFields = typeof formSchema.FieldsType;
+
+export const loaders = {
+    list: async () => {
+        // TODO: Implement list loader
+        return [];
+    },
+    one: async (id: number) => {
+        // TODO: Implement one loader
+        return null;
+    }
+} satisfies Loaders<typeof formSchema.FieldsType>;
+
+export const writers = {
+    create: async ({ request }) => {
+        const fields = await extractFields(request, formSchema.fields);
+        console.log("create this", { fields });
+        // TODO: Implement create writer
+        await finalizeRequest(request, formSchema);
+    },
+    update: async ({ request }) => {
+        const fields = await extractFields(request, formSchema.fields);
+        console.log("update this", { fields });
+        // TODO: Implement update writer
+        await finalizeRequest(request, formSchema);
+    },
+    delete: async ({ request }) => {
+        const id = (await request.formData()).get('id');
+        console.log("delete", { id });
+        // TODO: Implement delete writer
+        await finalizeRequest(request, formSchema);
+    }
+} satisfies Actions;
+
+export const actions = [
+    // TODO: Add custom actions if needed
+] as const;
+`;
+
+    await Deno.writeTextFile(outputFile, content);
+    console.log(`Generated definitions file: ${outputFile}`);
+}
+
 async function main() {
     const schemaPath = await findSchemaFile();
     if (!schemaPath) {
@@ -116,7 +232,9 @@ async function main() {
             .render();
     });
 
-    // TODO: Add logic to generate Svova files for selected tables
+    for (const table of selectedTables) {
+        await generateDefinitionsFile(table);
+    }
 }
 
 if (import.meta.main) {

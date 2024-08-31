@@ -2,6 +2,8 @@
 	import TextInputField from './TextInputField.svelte';
 	import NumberInputField from './NumberInputField.svelte';
 	import IdInputField from './IdInputField.svelte';
+	import BoolInputField from './BoolInputField.svelte';
+	import DateInputField from './DateInputField.svelte';
 	import type { InputFieldProps } from '../common';
 
 	let {
@@ -15,14 +17,16 @@
 
 	let Component = $state() as any;
 
-	if (type === 'id') {
+	if (type === `id`) {
 		Component = IdInputField;
-	}
-	if (type === 'text' || type === 'email' || type === 'password') {
+	} else if (type === `text` || type === `email` || type === `password`) {
 		Component = TextInputField;
-	}
-	if (type === 'number') {
+	} else if (type === `number`) {
 		Component = NumberInputField;
+	} else if (type === `checkbox`) {
+		Component = BoolInputField;
+	} else if (type === `date`) {
+		Component = DateInputField;
 	}
 </script>
 
