@@ -1,5 +1,5 @@
 <script module lang="ts">
-	export const createBoolField = (name: string, label: string) => {
+	export const createBooleanField = (name: string, label: string) => {
 		const field = {
 			name,
 			label,

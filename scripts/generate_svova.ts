@@ -118,6 +118,7 @@ const fields = {
         let fieldDefinition = ``;
 
         switch (column.type) {
+            case "number":
             case `integer`:
                 if (fieldName === `id`) {
                     fieldDefinition = `createIdField().build(),`;

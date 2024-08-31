@@ -2,7 +2,7 @@
 	import TextInputField from './TextInputField.svelte';
 	import NumberInputField from './NumberInputField.svelte';
 	import IdInputField from './IdInputField.svelte';
-	import BoolInputField from './BoolInputField.svelte';
+	import BoolInputField from './BooleanInputField.svelte';
 	import DateInputField from './DateInputField.svelte';
 	import type { InputFieldProps } from '../common';
 

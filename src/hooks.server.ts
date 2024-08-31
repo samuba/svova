@@ -52,20 +52,19 @@ function handleSvova({ event, resolve }) {
     });
 }
 
-let db: BetterSQLite3Database<typeof import("./lib/server/db/schema")>
 
 function handleDrizzleInitialization({ event, resolve }) {
-    if (db) return resolve(event);
+    if (event.locals.db) return resolve(event);
 
     const sqlite = new Database(DATABASE_URL);
-    db = drizzle(sqlite, { schema });
+    const db = drizzle(sqlite, { schema });
     event.locals.db = db;
 
     return resolve(event);
 }
 
 export const handle = sequence(
-    handleSvova,
+    //handleSvova,
     handleDrizzleInitialization
 );
 
