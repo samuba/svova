@@ -10,7 +10,7 @@ export const posts = sqliteTable('posts', {
 	id: integer('id').primaryKey(),
 	title: text('title').notNull(),
 	published: integer('published', { mode: 'boolean' }).notNull().default(false),
-	text: integer('text')
+	text: text('text')
 });
 
 export const comments = sqliteTable('comments', {
