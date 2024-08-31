@@ -6,6 +6,8 @@ import { createTextField } from "$lib/svova/fields/TextInputField.svelte";
 import { createBooleanField } from "$lib/svova/fields/BooleanInputField.svelte";
 import { createDateField } from "$lib/svova/fields/DateInputField.svelte";
 import { type Actions } from "@sveltejs/kit";
+import * as s from "$lib/server/db/schema";
+import { eq } from "drizzle-orm";
 
 const fields = {
     id: createTextField(`id`, `Id`)
@@ -32,33 +34,35 @@ export const formSchema = {
 export type FormFields = typeof formSchema.FieldsType;
 
 export const loaders = {
-    list: async () => {
-        // TODO: Implement list loader
-        return [];
+    list: async ({ locals: { db } }) => {
+        return await db.select().from(s.posts).all();
     },
-    one: async (id: number) => {
-        // TODO: Implement one loader
-        return null;
+    one: async (id, { locals: { db } }) => {
+        return await db.select().from(s.posts).where(eq(s.posts.id, id)).get();
     }
 } satisfies Loaders<typeof formSchema.FieldsType>;
 
 export const writers = {
     create: async ({ request, locals: { db } }) => {
         const fields = await extractFields(request, formSchema.fields);
-        console.log("create this", { fields });
-        // TODO: Implement create writer
+
+        await db.insert(s.posts).values(fields).run();
+
         await finalizeRequest(request, formSchema);
     },
-    update: async ({ request }) => {
+    update: async ({ request, locals: { db } }) => {
         const fields = await extractFields(request, formSchema.fields);
-        console.log("update this", { fields });
-        // TODO: Implement update writer
+        const id = parseInt(fields.id as string);
+
+        await db.update(s.posts).set(fields).where(eq(s.posts.id, id)).run();
+
         await finalizeRequest(request, formSchema);
     },
-    delete: async ({ request }) => {
+    delete: async ({ request, locals: { db } }) => {
         const id = (await request.formData()).get('id');
-        console.log("delete", { id });
-        // TODO: Implement delete writer
+
+        await db.delete(s.posts).where(eq(s.posts.id, parseInt(id as string))).run();
+
         await finalizeRequest(request, formSchema);
     }
 } satisfies Actions;
