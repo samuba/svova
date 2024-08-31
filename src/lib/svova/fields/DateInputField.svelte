@@ -99,7 +99,7 @@
 </script>
 
 <script lang="ts">
-	import type { InputFieldProps } from `$lib/svova/common`;
+	import type { InputFieldProps } from '$lib/svova/common';
 
 	let { attributes, name, label, helpText, value = $bindable() }: InputFieldProps = $props();
 </script>

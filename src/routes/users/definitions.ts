@@ -4,9 +4,18 @@ import { createIdField } from "$lib/svova/fields/IdInputField.svelte";
 import { createNumberField } from "$lib/svova/fields/NumberInputField.svelte";
 import { createTextField } from "$lib/svova/fields/TextInputField.svelte";
 import { type Actions, type RequestEvent } from "@sveltejs/kit";
+import * as s from "$lib/server/db/schema";
+import { eq } from "drizzle-orm";
 
 const fields = {
     id: createIdField().build(),
+
+    name: createTextField(`name`, `Full Name`)
+        .max(100)
+        .isRequired()
+        .withPlaceholder(`Enter your full name`)
+        .withHelpText(`Please provide your full name`)
+        .build(),
 
     email: createTextField(`email`, `Email Address`)
         .max(100)
@@ -41,50 +50,44 @@ export const formSchema = {
 export type FormFields = typeof formSchema.FieldsType;
 
 export const loaders = {
-    list: async () => {
-        return fakeDb.users;
+    list: async ({ locals: { db } }) => {
+        return await db.select().from(s.users).all();
     },
-    one: async (id: number) => {
-        return fakeDb.users.find(user => user.id === id);
+    one: async (id, { locals: { db } }) => {
+        return await db.select().from(s.users).where(eq(s.users.id, id)).get();
     }
 } satisfies Loaders<typeof formSchema.FieldsType>;
 
 export const writers = {
-    create: async ({ request }) => {
+    create: async ({ request, locals: { db } }) => {
         const fields = await extractFields(request, formSchema.fields);
 
-        console.log("create this", { fields });
-
-        fakeDb.users.push({
-            ...fields,
-            id: fakeDb.users.length + 1
-        });
+        await db.insert(s.users).values({
+            name: fields.name,
+            email: fields.email,
+            password: fields.password,
+            income: fields.income
+        }).run();
 
         await finalizeRequest(request, formSchema);
     },
-    update: async ({ request }) => {
+    update: async ({ request, locals: { db } }) => {
         const fields = await extractFields(request, formSchema.fields);
-        console.log("update this", { fields });
-
         const id = parseInt(fields.id as string);
-        const userIndex = fakeDb.users.findIndex(user => user.id === id);
 
-        if (userIndex === -1) {
-            return {
-                status: 404,
-                body: { message: `User with id ${id} not found` }
-            };
-        }
-
-        fakeDb.users[userIndex] = { ...fakeDb.users[userIndex], ...fields };
+        await db.update(s.users).set({
+            name: fields.name,
+            email: fields.email,
+            password: fields.password,
+            income: fields.income
+        }).where(eq(s.users.id, id)).run();
 
         await finalizeRequest(request, formSchema);
     },
-    delete: async ({ request }) => {
+    delete: async ({ request, locals: { db } }) => {
         const id = (await request.formData()).get('id');
-        console.log("delete", { id });
 
-        fakeDb.users = fakeDb.users.filter(user => user.id !== parseInt(id));
+        await db.delete(s.users).where(eq(s.users.id, parseInt(id as string))).run();
 
         await finalizeRequest(request, formSchema);
     }

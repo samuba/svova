@@ -68,6 +68,7 @@ async function parseSchema(schemaPath: string): Promise<{ name: string; columns:
                 const foreignKey = columnDef.table?.[Symbol("drizzle:SQLiteInlineForeignKeys")]?.map(fk => fk.reference.toString()) || undefined;
                 columns.push({ name: columnName, type: columnType, mode, foreignKey });
 
+                // TODO: foreign keys
                 // if (columnDef.table[Symbol.for("drizzle:SQLiteInlineForeignKeys")]?.[0]?.table?.[Symbol.for("drizzle:Name")]) {
                 //     console.log(tableName + ":" + columnName, columnDef.table[Symbol.for("drizzle:SQLiteInlineForeignKeys")]?.[0]?.table?.[Symbol.for("drizzle:Name")]);
                 //     console.log(tableName + ":" + columnName, columnDef.table[Symbol.for("drizzle:SQLiteInlineForeignKeys")]?.[1]?.reference.toString());
@@ -99,13 +100,13 @@ async function generateDefinitionsFile(table: { name: string; columns: { name: s
     await fs.ensureDir(outputDir);
 
     let content = `
-import { extractActionParams, extractFields, finalizeRequest, sleep, type FieldsType, type FormSchema, type Loaders } from "$lib/svova/common";
+import { extractActionParams, extractFields, finalizeRequest, type FieldsType, type FormSchema, type Loaders } from "$lib/svova/common";
 import { createIdField } from "$lib/svova/fields/IdInputField.svelte";
 import { createNumberField } from "$lib/svova/fields/NumberInputField.svelte";
 import { createTextField } from "$lib/svova/fields/TextInputField.svelte";
 import { createBooleanField } from "$lib/svova/fields/BooleanInputField.svelte";
 import { createDateField } from "$lib/svova/fields/DateInputField.svelte";
-import { type Actions, type RequestEvent } from "@sveltejs/kit";
+import { type Actions } from "@sveltejs/kit";
 
 const fields = {
 `;
@@ -237,6 +238,4 @@ async function main() {
     }
 }
 
-if (import.meta.main) {
-    main();
-}
+await main();

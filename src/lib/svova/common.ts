@@ -40,7 +40,7 @@ export async function extractFields<T extends FormSchemaFields>(request: Request
         }
     }
 
-    return fields as FieldsType<T>;
+    return fields as Simplify<FieldsType<T>>;
 }
 
 export async function extractActionParams<T extends FormSchemaFields, T2 extends FormSchema>(request: Request, paramsSchema: T, formSchema: T2) {
@@ -62,8 +62,8 @@ export type InputFieldProps = {
 }
 
 export type Loaders<T extends FormSchema['FieldsType']> = {
-    list: () => Promise<T[]>;
-    one: (id: number) => Promise<T | undefined>;
+    list: (event: RequestEvent) => Promise<T[]>;
+    one: (id: number, event: RequestEvent) => Promise<T | undefined>;
 }
 
 
@@ -78,3 +78,5 @@ export function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 
 }
+
+export type Simplify<T> = { [KeyType in keyof T]: T[KeyType] } & {};

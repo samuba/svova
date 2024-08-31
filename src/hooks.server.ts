@@ -1,64 +1,76 @@
-import type { Handle } from '@sveltejs/kit';
+import { sequence } from '@sveltejs/kit/hooks';
 import { formSchema, loaders } from './postDefinitions';
 import { render } from 'svelte/server';
 import Page from '$lib/svova/Page.svelte';
 import Layout from "./routes/+layout.svelte";
 import { readFileSync } from 'fs';
+import { redirect } from '@sveltejs/kit';
+import { drizzle, type BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
+import Database from 'better-sqlite3';
+import * as schema from '$lib/server/db/schema';
+import { DATABASE_URL } from '$env/static/private';
 
-export const handle: Handle = async ({ event, resolve }) => {
 
-    if (event.url.pathname.startsWith(formSchema.path)) {
-        console.log({ pathname: event.url.pathname })
-        const view = event.url.pathname.split('/').pop();
-
-        let all = [] as Awaited<ReturnType<typeof loaders.list>>;
-        let one = undefined as Awaited<ReturnType<typeof loaders.one>>;
-
-        console.log({ view })
-
-        if (view === 'new') {
-            // nothing to do
-        } else if (view.match(/\d/)) {
-            if (typeof formSchema.fields.id.exampleValue === 'number') {
-                one = await loaders.one(parseInt(view));
-            } else {
-                one = await loaders.one(view);
-            }
-        } else if (view === 'list') {
-            all = await loaders.list();
-        } else {
-            redirect(302, `${formSchema.path}/list`);
-        }
-
-        const html = await renderWithLayout(Page, {
-            props: {
-                data: {
-                    form: formSchema,
-                    view: view,
-                    data: all,
-                    one
-                }
-            }
-        });
-
-        return new Response(html, {
-            headers: {
-                'Content-Type': 'text/html'
-            }
-        });
-
+function handleSvova({ event, resolve }) {
+    if (!event.url.pathname.startsWith(formSchema.path)) {
+        return resolve(event);
     }
 
-    const response = await resolve(event);
+    const view = event.url.pathname.split('/').pop();
+    let all = [];
+    let one = undefined;
 
-    return response;
-};
+    if (view === 'new') {
+        // nothing to do
+    } else if (view?.match(/\d/)) {
+        if (typeof formSchema.fields.id.exampleValue === 'number') {
+            one = loaders.one(parseInt(view));
+        } else {
+            one = loaders.one(view);
+        }
+    } else if (view === 'list') {
+        all = loaders.list();
+    } else {
+        throw redirect(302, `${formSchema.path}/list`);
+    }
 
+    const html = renderWithLayout(Page, {
+        props: {
+            data: {
+                form: formSchema,
+                view: view,
+                data: all,
+                one
+            }
+        }
+    });
 
-export async function renderWithLayout(Component: any, props = {}) {
-    console.log("renderWithLayout")
+    return new Response(html, {
+        headers: {
+            'Content-Type': 'text/html'
+        }
+    });
+}
+
+let db: BetterSQLite3Database<typeof import("./lib/server/db/schema")>
+
+function handleDrizzleInitialization({ event, resolve }) {
+    if (db) return resolve(event);
+
+    const sqlite = new Database(DATABASE_URL);
+    db = drizzle(sqlite, { schema });
+    event.locals.db = db;
+
+    return resolve(event);
+}
+
+export const handle = sequence(
+    handleSvova,
+    handleDrizzleInitialization
+);
+
+function renderWithLayout(Component, props = {}) {
     const page = render(Component, props);
-
 
     const { body: layoutHtml, head: layoutHead } = render(Layout, {
         props: {
@@ -66,12 +78,9 @@ export async function renderWithLayout(Component: any, props = {}) {
             $$scope: {}
         }
     });
-    console.log("page.head", layoutHead)
 
-    const head = layoutHead + page.body;
-    const appCss = await readFileSync("src/app.css", 'utf8');
-    console.log({ appCss })
-    // const css = layoutCss.code + pageCss.code;
+    const head = layoutHead + page.head;
+    const appCss = readFileSync("src/app.css", 'utf8');
 
     return `
       <!DOCTYPE html>
