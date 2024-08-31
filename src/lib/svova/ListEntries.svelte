@@ -4,6 +4,18 @@
 
 	let { form, data, svovaActions }: { form: FormSchema; data: any[]; svovaActions: SvovaActions } =
 		$props();
+
+	let selectedRows: (number | string)[] = $state([]);
+
+	function toggleRow(id: number | string) {
+		if (selectedRows.includes(id)) {
+			selectedRows = selectedRows.filter((rowId) => rowId !== id);
+		} else {
+			selectedRows = [...selectedRows, id];
+		}
+	}
+
+	$inspect(selectedRows);
 </script>
 
 <div class="px-4 sm:px-6 lg:px-8">
@@ -16,7 +28,7 @@
 		</div>
 		<div class="mt-4 flex gap-4 sm:ml-16 sm:mt-0">
 			{#each svovaActions as action}
-				<ActionForm {action} modelIds={[]} />
+				<ActionForm {action} modelIds={selectedRows} enabled={selectedRows.length > 0} />
 			{/each}
 
 			<a
@@ -34,6 +46,9 @@
 					<table class="min-w-full divide-y divide-gray-300">
 						<thead class="bg-gray-50">
 							<tr>
+								<th scope="col" class="relative py-3.5 pl-4 pr-3 sm:pl-6">
+									<span class="sr-only">Select</span>
+								</th>
 								{#each Object.values(form.fields) as field}
 									{#if !field.hidden}
 										<th
@@ -53,6 +68,14 @@
 						<tbody class="divide-y divide-gray-200 bg-white">
 							{#each data as entry (entry.id)}
 								<tr>
+									<td class="relative py-4 pl-4 pr-3 sm:pl-6">
+										<input
+											type="checkbox"
+											class="absolute left-4 top-1/2 -mt-2 h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
+											checked={selectedRows.includes(entry.id)}
+											on:change={() => toggleRow(entry.id)}
+										/>
+									</td>
 									{#each Object.values(form.fields) as field}
 										{#if !field.hidden}
 											<td

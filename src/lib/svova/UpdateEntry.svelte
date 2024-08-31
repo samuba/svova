@@ -17,9 +17,9 @@
 		</div>
 	</div>
 
-	<div class="my-4">
+	<div class="my-4 flex justify-end gap-6">
 		{#each svovaActions as action}
-			<ActionForm {action} modelIds={[one.id]} />
+			<ActionForm {action} modelIds={[one.id]} enabled={true} />
 		{/each}
 	</div>
 

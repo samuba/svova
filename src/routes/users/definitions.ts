@@ -102,12 +102,32 @@ export const actions = [
         handle(params: typeof this.params) {
             return async ({ request }: RequestEvent) => {
                 const { modelIds, title } = await extractActionParams(request, params, formSchema);
-                const models = fakeDb.getUsers(modelIds);
+                const models = fakeDb.getUsers(modelIds as number[]);
 
                 console.log(`executing resendRegistrationEmail. title=${title} models=`, models);
                 await sleep(2000);
             }
         },
+    },
+    {
+        name: "blowCandles",
+        label: "Blow Candles on the Cake",
+        params: {
+            strength: createNumberField(`strength`, `Strength of Blow`)
+                .withMax(10)
+                .withHelpText("0 is no strength, 10 is a strong blow")
+                .build(),
+        },
+        handle(params: typeof this.params) {
+            return async ({ request }: RequestEvent) => {
+                const { modelIds, strength } = await extractActionParams(request, params, formSchema);
+                const models = fakeDb.getUsers(modelIds as number[]);
+
+                console.log(`executing resendRegistrationEmail. strength=${strength} models=`, models);
+                await sleep(2000);
+            }
+        },
     }
+
 ]
 

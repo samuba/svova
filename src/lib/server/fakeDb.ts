@@ -14,7 +14,7 @@ export const fakeDb = {
     },
 
     getUsers(ids: number[]) {
-        return this.users.find(x => ids.includes(x.id));
+        return this.users.filter(x => ids.includes(x.id));
     },
 
     getPost(id: number) {

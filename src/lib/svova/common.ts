@@ -30,6 +30,7 @@ export async function extractFields<T extends FormSchemaFields>(request: Request
     const data = await request.clone().formData();
     const fields = {} as Record<string, unknown>;
     for (const [key, value] of data.entries()) {
+        console.log({ key, value, schemaFields });
         if (key === "modelIds") {
             fields[key] = JSON.parse(value.toString());
         } else if (typeof schemaFields[key].exampleValue === "string") {
@@ -45,7 +46,7 @@ export async function extractFields<T extends FormSchemaFields>(request: Request
 export async function extractActionParams<T extends FormSchemaFields, T2 extends FormSchema>(request: Request, paramsSchema: T, formSchema: T2) {
     const actionParamsSchema = { ...paramsSchema, modelIds: { exampleValue: formSchema.fields.id.exampleValue } }
     const res = await extractFields<T>(request, actionParamsSchema);
-    return res as typeof res & { modelIds: number | string[] };
+    return res as typeof res & { modelIds: (number | string)[] };
 }
 
 export async function finalizeRequest(request: Request, schema: FormSchema) {

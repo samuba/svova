@@ -3,7 +3,11 @@
 	import type { SvovaActions } from './common';
 	import { enhance } from '$app/forms';
 
-	let { action, modelIds }: { action: SvovaActions<any>[string]; modelIds: (number | string)[] } =
+	let {
+		action,
+		modelIds,
+		enabled
+	}: { action: SvovaActions<any>[string]; modelIds: (number | string)[]; enabled: boolean } =
 		$props();
 
 	let isDialogOpen = $state(false);
@@ -14,8 +18,15 @@
 
 <button
 	type="button"
-	onclick={() => (isDialogOpen = true)}
-	class="w-fit rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-600"
+	onclick={() => {
+		if (enabled) isDialogOpen = true;
+	}}
+	class={`w-fit rounded-md px-3 py-2 text-sm font-semibold shadow-sm ${
+		enabled
+			? `bg-white text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-600`
+			: `cursor-not-allowed bg-gray-100 text-gray-400`
+	}`}
+	disabled={!enabled}
 >
 	{action.label}
 </button>
