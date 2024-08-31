@@ -1,6 +1,6 @@
 # SVOVA
 
-A proof of concept to bring nivcties from Laravel, particularly Laravel Nova, to the Svelte world.
+A proof of concept to bring niceties from Laravel, particularly Laravel Nova, to the Svelte world.
 
 ## Developing
 
