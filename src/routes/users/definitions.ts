@@ -52,6 +52,7 @@ export const loaders = {
 export const writers = {
     create: async ({ request }) => {
         const fields = await extractFields(request, formSchema.fields);
+
         console.log("create this", { fields });
 
         fakeDb.users.push({
@@ -113,17 +114,14 @@ export const actions = [
         name: "blowCandles",
         label: "Blow Candles on the Cake",
         params: {
-            strength: createNumberField(`strength`, `Strength of Blow`)
-                .withMax(10)
-                .withHelpText("0 is no strength, 10 is a strong blow")
-                .build(),
+
         },
         handle(params: typeof this.params) {
             return async ({ request }: RequestEvent) => {
-                const { modelIds, strength } = await extractActionParams(request, params, formSchema);
+                const { modelIds } = await extractActionParams(request, params, formSchema);
                 const models = fakeDb.getUsers(modelIds as number[]);
 
-                console.log(`executing resendRegistrationEmail. strength=${strength} models=`, models);
+                console.log(`executing blow candles.  models=`, models);
                 await sleep(2000);
             }
         },
