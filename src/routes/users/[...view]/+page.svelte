@@ -1,17 +1,7 @@
 <script lang="ts">
-	import CreateEntry from '$lib/svova/CreateEntry.svelte';
-	import ListEntries from '$lib/svova/ListEntries.svelte';
-	import UpdateEntry from '$lib/svova/UpdateEntry.svelte';
+	import CrudPage from '$lib/svova/CrudPage.svelte';
 
-	const { data: p } = $props();
+	const { data } = $props();
 </script>
 
-<div class="p-6">
-	{#if p.view === 'new'}
-		<CreateEntry {...p} />
-	{:else if p.view === 'list'}
-		<ListEntries {...p} />
-	{:else if p.view.match(/\d/)}
-		<UpdateEntry {...p} />
-	{/if}
-</div>
+<CrudPage {data} />

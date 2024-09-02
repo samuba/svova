@@ -9,7 +9,7 @@ export const load = (async (event) => {
     let one = undefined as Awaited<ReturnType<typeof loaders.one>>;
     const { view } = event.params;
 
-    if (view === 'new') {
+    if (view === 'create') {
         // nothing to do
     } else if (view.match(/\d/)) {
         const id = typeof formSchema.fields.id.exampleValue === 'number' ? parseInt(view) : view
@@ -31,10 +31,6 @@ export const load = (async (event) => {
     };
 }) satisfies PageServerLoad;
 
-const convertedSvovaActions = Object.fromEntries(
-    svovaActions.map(x => ([x.name, x.handle(x.params)]))
-);
-
 export const actions = {
     create: async (event: RequestEvent) => {
         const fields = await extractFields(event.request, formSchema.fields);
@@ -51,6 +47,8 @@ export const actions = {
         await writers.delete(fields.id as number, event);
         redirect(307, `${formSchema.path}/list`);
     },
-    ...convertedSvovaActions
+    ...Object.fromEntries(
+        svovaActions.map(x => ([x.name, x.handle(x.params)]))
+    )
 } satisfies Actions;
 

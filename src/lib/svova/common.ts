@@ -86,3 +86,9 @@ export type Writers<T extends FormSchema> = {
     update: (fields: T['FieldsType'], event: RequestEvent) => Promise<void>;
     delete: (id: T['FieldsType']['id'], event: RequestEvent) => Promise<void>;
 };
+
+export function getRoutePathToFile(meta: { dirname: string, filename: string }) {
+    const route = meta.dirname.match(/src\/routes(.*)/)?.[1];
+    if (!route) throw new Error(`Could not find route for file ${meta.filename}`);
+    return route
+}

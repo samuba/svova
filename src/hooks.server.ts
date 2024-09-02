@@ -1,7 +1,7 @@
 import { sequence } from '@sveltejs/kit/hooks';
 import { formSchema, loaders } from './postDefinitions';
 import { render } from 'svelte/server';
-import Page from '$lib/svova/Page.svelte';
+import Page from '$lib/svova/CrudPage.svelte';
 import Layout from "./routes/+layout.svelte";
 import { readFileSync } from 'fs';
 import { redirect } from '@sveltejs/kit';

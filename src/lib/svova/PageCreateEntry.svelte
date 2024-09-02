@@ -4,6 +4,9 @@
 	import type { FormSchema } from './common';
 
 	let { form }: { form: FormSchema } = $props();
+
+	const fields = structuredClone(form.fields);
+	delete fields.id; // never have id field in create form
 </script>
 
 <div class="px-4 sm:px-6 lg:px-8">
@@ -13,7 +16,7 @@
 		</div>
 	</div>
 	<form method="POST" use:enhance action="?/create" class="flex flex-col gap-4">
-		{#each Object.values(form.fields) as field}
+		{#each Object.values(fields) as field}
 			<GenericInputField
 				type={field.type}
 				attributes={field.elementAttributes}

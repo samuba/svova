@@ -1,11 +1,8 @@
-import { fakeDb } from "$lib/server/fakeDb";
-import { extractActionParams, sleep, type FieldsType, type FormSchema, type Loaders, type Writers } from "$lib/svova/common";
-import { createIdField } from "$lib/svova/fields/IdInputField.svelte";
-import { createNumberField } from "$lib/svova/fields/NumberInputField.svelte";
-import { createTextField } from "$lib/svova/fields/TextInputField.svelte";
+import { extractActionParams, getRoutePathToFile, sleep, type FieldsType, type FormSchema, type Loaders, type Writers } from "$lib/svova/common";
 import { type RequestEvent } from "@sveltejs/kit";
 import * as s from "$lib/server/db/schema";
-import { eq, type Simplify } from "drizzle-orm";
+import { eq, inArray, type Simplify } from "drizzle-orm";
+import { createIdField, createNumberField, createTextField } from "$lib/svova/fields";
 
 const fields = {
     id: createIdField<number>({ dataType: 'number' }).build(),
@@ -41,10 +38,48 @@ const fields = {
 
 } satisfies FormSchema['fields'];
 
+export const actions = [
+    {
+        name: "resendRegistrationEmail",
+        label: "Resend Registration Email",
+        params: {
+            title: createTextField(`title`, `Title to use in Email`)
+                .withPlaceholder("Professor")
+                .build(),
+        },
+        handle(params: typeof this.params) {
+            return async ({ request, locals: { db } }: RequestEvent) => {
+                const { modelIds, title } = await extractActionParams(request, params, formSchema);
+                const models = db.select().from(s.users).where(inArray(s.users.id, modelIds)).all();
+
+                console.log(`executing resendRegistrationEmail. title=${title} models=`, models);
+                await sleep(500);
+            }
+        },
+    },
+    {
+        name: "blowCandles",
+        label: "Blow Candles on the Cake",
+        params: {
+
+        },
+        handle(params: typeof this.params) {
+            return async ({ request, locals: { db } }: RequestEvent) => {
+                const { modelIds } = await extractActionParams(request, params, formSchema);
+                const models = db.select().from(s.users).where(inArray(s.users.id, modelIds)).all();
+
+                console.log(`executing blow candles.  models=`, models);
+                await sleep(500);
+            }
+        },
+    }
+
+] as const
+
 export const formSchema = {
     fields,
     FieldsType: {} as Simplify<FieldsType<typeof fields>>,
-    path: `/users`
+    path: getRoutePathToFile(import.meta) // `/users`
 } satisfies FormSchema;
 
 export type FormFields = typeof formSchema.FieldsType;
@@ -70,41 +105,3 @@ export const writers = {
     }
 } satisfies Writers<typeof formSchema>;
 
-
-export const actions = [
-    {
-        name: "resendRegistrationEmail",
-        label: "Resend Registration Email",
-        params: {
-            title: createTextField(`title`, `Title to use in Email`)
-                .withPlaceholder("Professor")
-                .build(),
-        },
-        handle(params: typeof this.params) {
-            return async ({ request }: RequestEvent) => {
-                const { modelIds, title } = await extractActionParams(request, params, formSchema);
-                const models = fakeDb.getUsers(modelIds as number[]);
-
-                console.log(`executing resendRegistrationEmail. title=${title} models=`, models);
-                await sleep(2000);
-            }
-        },
-    },
-    {
-        name: "blowCandles",
-        label: "Blow Candles on the Cake",
-        params: {
-
-        },
-        handle(params: typeof this.params) {
-            return async ({ request }: RequestEvent) => {
-                const { modelIds } = await extractActionParams(request, params, formSchema);
-                const models = fakeDb.getUsers(modelIds as number[]);
-
-                console.log(`executing blow candles.  models=`, models);
-                await sleep(2000);
-            }
-        },
-    }
-
-] as const
