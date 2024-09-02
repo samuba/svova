@@ -5,7 +5,7 @@ import { createTextField } from "$lib/svova/fields/TextInputField.svelte";
 import { type Actions } from "@sveltejs/kit";
 
 const fields = {
-    id: createIdField().build(),
+    id: createIdField<number>({ dataType: 'number' }).build(),
 
     title: createTextField(`title`, `Title`)
         .max(100)

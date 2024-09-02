@@ -65,7 +65,7 @@ async function parseSchema(schemaPath: string): Promise<{ name: string; columns:
 
                 const columnType = columnDef.dataType;
                 const mode = columnDef.mode;
-                const foreignKey = columnDef.table?.[Symbol("drizzle:SQLiteInlineForeignKeys")]?.map(fk => fk.reference.toString()) || undefined;
+                const foreignKey = "TODO" //columnDef.table?.[Symbol("drizzle:SQLiteInlineForeignKeys")]?.map(fk => fk.reference.toString()) || undefined;
                 columns.push({ name: columnName, type: columnType, mode, foreignKey });
 
                 // TODO: foreign keys

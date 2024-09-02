@@ -1,14 +1,14 @@
 import { fakeDb } from "$lib/server/fakeDb";
-import { extractActionParams, extractFields, finalizeRequest, sleep, type FieldsType, type FormSchema, type Loaders, type SvovaActions } from "$lib/svova/common";
+import { extractActionParams, sleep, type FieldsType, type FormSchema, type Loaders, type Writers } from "$lib/svova/common";
 import { createIdField } from "$lib/svova/fields/IdInputField.svelte";
 import { createNumberField } from "$lib/svova/fields/NumberInputField.svelte";
 import { createTextField } from "$lib/svova/fields/TextInputField.svelte";
-import { type Actions, type RequestEvent } from "@sveltejs/kit";
+import { type RequestEvent } from "@sveltejs/kit";
 import * as s from "$lib/server/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, type Simplify } from "drizzle-orm";
 
 const fields = {
-    id: createIdField().build(),
+    id: createIdField<number>({ dataType: 'number' }).build(),
 
     name: createTextField(`name`, `Full Name`)
         .max(100)
@@ -43,7 +43,7 @@ const fields = {
 
 export const formSchema = {
     fields,
-    FieldsType: {} as FieldsType<typeof fields>,
+    FieldsType: {} as Simplify<FieldsType<typeof fields>>,
     path: `/users`
 } satisfies FormSchema;
 
@@ -51,47 +51,24 @@ export type FormFields = typeof formSchema.FieldsType;
 
 export const loaders = {
     list: async ({ locals: { db } }) => {
-        return await db.select().from(s.users).all();
+        return await db.select().from(s.users);
     },
     one: async (id, { locals: { db } }) => {
         return await db.select().from(s.users).where(eq(s.users.id, id)).get();
     }
-} satisfies Loaders<typeof formSchema.FieldsType>;
+} satisfies Loaders<typeof formSchema>;
 
 export const writers = {
-    create: async ({ request, locals: { db } }) => {
-        const fields = await extractFields(request, formSchema.fields);
-
-        await db.insert(s.users).values({
-            name: fields.name,
-            email: fields.email,
-            password: fields.password,
-            income: fields.income
-        }).run();
-
-        await finalizeRequest(request, formSchema);
+    create: async (fields, { locals: { db } }) => {
+        await db.insert(s.users).values(fields).run();
     },
-    update: async ({ request, locals: { db } }) => {
-        const fields = await extractFields(request, formSchema.fields);
-        const id = parseInt(fields.id as string);
-
-        await db.update(s.users).set({
-            name: fields.name,
-            email: fields.email,
-            password: fields.password,
-            income: fields.income
-        }).where(eq(s.users.id, id)).run();
-
-        await finalizeRequest(request, formSchema);
+    update: async (fields, { locals: { db } }) => {
+        await db.update(s.users).set(fields).where(eq(s.users.id, fields.id as number)).run();
     },
-    delete: async ({ request, locals: { db } }) => {
-        const id = (await request.formData()).get('id');
-
-        await db.delete(s.users).where(eq(s.users.id, parseInt(id as string))).run();
-
-        await finalizeRequest(request, formSchema);
+    delete: async (id, { locals: { db } }) => {
+        await db.delete(s.users).where(eq(s.users.id, id)).run();
     }
-} satisfies Actions;
+} satisfies Writers<typeof formSchema>;
 
 
 export const actions = [

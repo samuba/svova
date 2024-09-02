@@ -61,9 +61,9 @@ export type InputFieldProps = {
     value: string;
 }
 
-export type Loaders<T extends FormSchema['FieldsType']> = {
-    list: (event: RequestEvent) => Promise<T[]>;
-    one: (id: number, event: RequestEvent) => Promise<T | undefined>;
+export type Loaders<T extends FormSchema> = {
+    list: (event: RequestEvent) => Promise<T['FieldsType'][]>;
+    one: (id: number, event: RequestEvent) => Promise<T['FieldsType'] | undefined>;
 }
 
 
@@ -80,3 +80,9 @@ export function sleep(ms: number) {
 }
 
 export type Simplify<T> = { [KeyType in keyof T]: T[KeyType] } & {};
+
+export type Writers<T extends FormSchema> = {
+    create: (fields: Simplify<Omit<T['FieldsType'], 'id'>>, event: RequestEvent) => Promise<void>;
+    update: (fields: T['FieldsType'], event: RequestEvent) => Promise<void>;
+    delete: (id: T['FieldsType']['id'], event: RequestEvent) => Promise<void>;
+};

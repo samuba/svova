@@ -1,2 +1,2 @@
-nova actions -> all entries
-db
+pagination in table
+global search
