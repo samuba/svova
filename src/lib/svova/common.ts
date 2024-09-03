@@ -93,3 +93,8 @@ export function getRoutePathToFile(meta: { dirname: string, filename: string }) 
     if (!route) throw new Error(`Could not find route for file ${meta.filename}`);
     return route
 }
+
+export function getNameFromPath(path: string) {
+    const lastPart = path.split('/')?.pop()
+    return lastPart?.charAt(0)?.toUpperCase() + lastPart?.slice(1);
+}

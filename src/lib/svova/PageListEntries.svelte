@@ -1,6 +1,6 @@
 <script lang="ts">
 	import ActionForm from './ActionForm.svelte';
-	import type { FormSchema, SvovaActions } from './common';
+	import { getNameFromPath, type FormSchema, type SvovaActions } from './common';
 
 	let { form, data, svovaActions }: { form: FormSchema; data: any[]; svovaActions: SvovaActions } =
 		$props();
@@ -19,9 +19,9 @@
 <div class="px-4 sm:px-6 lg:px-8">
 	<div class="sm:flex sm:items-center">
 		<div class="sm:flex-auto">
-			<h1 class="text-base font-semibold leading-6 text-gray-900">Users</h1>
+			<h1 class="text-base font-semibold leading-6 text-gray-900">{getNameFromPath(form.path)}</h1>
 			<p class="mt-2 text-sm text-gray-700">
-				A list of all the users in your account including their name, title, email and role.
+				Lorem Ipsum is simply dummy text of the printing and typesetting industry.
 			</p>
 		</div>
 		<div class="mt-4 flex gap-4 sm:ml-16 sm:mt-0">
