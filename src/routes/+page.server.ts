@@ -8,12 +8,11 @@ export const load = (async () => {
             return key
         }
     })
-    console.log(potentialModels)
 
     const formSchemas = []
     for (const model of potentialModels) {
         try {
-            const definitions = await import(`./${model}/definitions`)
+            const definitions = await import(`./${model}/definitions.ts`)
             formSchemas.push(definitions.formSchema)
         } catch (e) {
             //
