@@ -1,11 +1,10 @@
 import { sequence } from '@sveltejs/kit/hooks';
-import { formSchema, loaders } from './postDefinitions';
 import { render } from 'svelte/server';
 import Page from '$lib/svova/CrudPage.svelte';
 import Layout from "./routes/+layout.svelte";
 import { readFileSync } from 'fs';
 import { redirect } from '@sveltejs/kit';
-import { drizzle, type BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
+import { drizzle } from 'drizzle-orm/better-sqlite3';
 import Database from 'better-sqlite3';
 import * as schema from '$lib/server/db/schema';
 import { DATABASE_URL } from '$env/static/private';
@@ -20,7 +19,7 @@ function handleSvova({ event, resolve }) {
     let all = [];
     let one = undefined;
 
-    if (view === 'new') {
+    if (view === 'create') {
         // nothing to do
     } else if (view?.match(/\d/)) {
         if (typeof formSchema.fields.id.exampleValue === 'number') {

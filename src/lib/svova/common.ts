@@ -22,9 +22,9 @@ export function createFieldsType<T extends Record<string, { exampleValue: unknow
     };
 }
 
-export type FieldsType<T extends FormSchemaFields> = {
+export type FieldsType<T extends FormSchemaFields> = Simplify<{
     [K in keyof T]: T[K]['exampleValue'];
-};
+}>;
 
 export async function extractFields<T extends FormSchemaFields>(request: Request, schemaFields: T) {
     const data = await request.clone().formData();
@@ -37,6 +37,8 @@ export async function extractFields<T extends FormSchemaFields>(request: Request
             fields[key] = value.toString();
         } else if (typeof schemaFields[key].exampleValue === "number") {
             fields[key] = Number(value);
+        } else if (typeof schemaFields[key].exampleValue === "boolean") {
+            fields[key] = value == "true";
         }
     }
 

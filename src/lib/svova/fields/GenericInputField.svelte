@@ -3,7 +3,6 @@
 	import NumberInputField from './NumberInputField.svelte';
 	import IdInputField from './IdInputField.svelte';
 	import BoolInputField from './BooleanInputField.svelte';
-	import DateInputField from './DateInputField.svelte';
 	import type { InputFieldProps } from '../common';
 
 	let {
@@ -25,8 +24,6 @@
 		Component = NumberInputField;
 	} else if (type === `checkbox`) {
 		Component = BoolInputField;
-	} else if (type === `date`) {
-		Component = DateInputField;
 	}
 </script>
 

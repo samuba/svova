@@ -1,40 +1,33 @@
 <script module lang="ts">
-	export const createIdField = <T extends string | number>(args: {
+	export function createIdField<T extends 'string' | 'number'>(args: {
+		dataType: T;
+		hidden?: boolean;
+		readonly?: boolean;
 		name?: string;
-		dataType: 'string' | 'number';
-	}) => {
-		const field = {
-			name: args?.name ?? 'id',
-			hidden: true,
-			readonly: true,
-			elementAttributes: {} as Record<string, string>,
-			exampleValue: args.dataType === 'number' ? (2 as T) : ('2' as T),
+	}) {
+		args.name = args.name ?? 'id';
+		const elementAttributes = {
+			name: args.name,
+			id: args.name,
+			type: 'text'
+		} as Record<string, string>;
+
+		if (args.readonly) elementAttributes.readonly = `true`;
+		if (args.hidden) {
+			elementAttributes.hidden = `true`;
+			elementAttributes.style = `display: none;`;
+		}
+
+		return {
+			name: args.name,
+			exampleValue: (args.dataType === 'number' ? 2 : '2') as T extends 'number' ? number : string,
 			type: 'id',
-
-			render() {
-				this.elementAttributes = {
-					name: this.name,
-					id: this.name,
-					readonly: this.readonly ? `true` : `false`,
-					hidden: this.hidden ? `true` : `false`,
-					style: this.hidden ? `display: none;` : ``
-				};
-			},
-
-			build() {
-				this.render();
-				return {
-					name: this.name,
-					exampleValue: this.exampleValue,
-					elementAttributes: this.elementAttributes,
-					hidden: this.hidden,
-					type: this.type
-				};
-			}
+			elementAttributes,
+			hidden: args.hidden ?? true,
+			readonly: args.readonly ?? true
 		};
+	}
 
-		return field;
-	};
 	export type IdInputField = ReturnType<typeof createIdField>;
 </script>
 

@@ -7,7 +7,7 @@
 </script>
 
 <div class="my-6">
-	{#if data.view === 'new'}
+	{#if data.view === 'create'}
 		<PageCreateEntry {...data} />
 	{:else if data.view === 'list'}
 		<PageListEntries {...data} />

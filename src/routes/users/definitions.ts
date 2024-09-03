@@ -2,50 +2,52 @@ import { extractActionParams, getRoutePathToFile, sleep, type FieldsType, type F
 import { type RequestEvent } from "@sveltejs/kit";
 import * as s from "$lib/server/db/schema";
 import { eq, inArray, type Simplify } from "drizzle-orm";
-import { createIdField, createNumberField, createTextField } from "$lib/svova/fields";
+import { createBooleanField, createIdField, createNumberField, createTextField } from "$lib/svova/fields";
 
 const fields = {
-    id: createIdField<number>({ dataType: 'number' }).build(),
+    id: createIdField({ dataType: 'number' }),
 
-    name: createTextField(`name`, `Full Name`)
-        .max(100)
-        .isRequired()
-        .withPlaceholder(`Enter your full name`)
-        .withHelpText(`Please provide your full name`)
-        .build(),
+    name: createTextField(`name`, `Full Name`, {
+        required: true,
+        maxLength: 100,
+        placeholder: `Enter your full name`,
+        helpText: `Please provide your full name`
+    }),
+    email: createTextField(`email`, `Email Address`, {
+        required: true,
+        maxLength: 100,
+        placeholder: `Enter your email`,
+        pattern: `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$`,
+        asEmail: true
+    }),
+    password: createTextField(`password`, `Password`, {
+        required: true,
+        minLength: 8,
+        placeholder: `Enter your password`,
+        helpText: `Password must be at least 8 characters long`,
+        asPassword: true
+    }),
+    income: createNumberField(`income`, `Income`, {
+        required: true,
+        placeholder: `Enter your income`,
+        helpText: `Please provide your income`,
+        min: 0,
+    }),
+    isActive: createBooleanField(`isActive`, `Is User Active`, {
+        defaultValue: true
+    }),
 
-    email: createTextField(`email`, `Email Address`)
-        .max(100)
-        .isRequired()
-        .asEmail()
-        .withPlaceholder(`Enter your email`)
-        .withPattern(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$`)
-        .build(),
-
-    password: createTextField(`password`, `Password`)
-        .min(8)
-        .isRequired()
-        .asPassword()
-        .withPlaceholder(`Enter your password`)
-        .withHelpText(`Password must be at least 8 characters long`)
-        .build(),
-
-    income: createNumberField(`income`, `Income`)
-        .withMin(0)
-        .withHelpText(`Be real. How much money do you make in a year?`)
-        .build(),
-
-
-} satisfies FormSchema['fields'];
+} satisfies FormSchema['fields']
 
 export const actions = [
     {
         name: "resendRegistrationEmail",
         label: "Resend Registration Email",
         params: {
-            title: createTextField(`title`, `Title to use in Email`)
-                .withPlaceholder("Professor")
-                .build(),
+            title: createTextField(`title`, `Title to use in Email`, {
+                required: true,
+                placeholder: "Professor"
+            })
         },
         handle(params: typeof this.params) {
             return async ({ request, locals: { db } }: RequestEvent) => {
@@ -60,9 +62,7 @@ export const actions = [
     {
         name: "blowCandles",
         label: "Blow Candles on the Cake",
-        params: {
-
-        },
+        params: {},
         handle(params: typeof this.params) {
             return async ({ request, locals: { db } }: RequestEvent) => {
                 const { modelIds } = await extractActionParams(request, params, formSchema);
@@ -95,9 +95,11 @@ export const loaders = {
 
 export const writers = {
     create: async (fields, { locals: { db } }) => {
+        console.log(`creating user with fields=`, fields);
         await db.insert(s.users).values(fields).run();
     },
     update: async (fields, { locals: { db } }) => {
+        console.log(`updating user with fields=`, fields);
         await db.update(s.users).set(fields).where(eq(s.users.id, fields.id as number)).run();
     },
     delete: async (id, { locals: { db } }) => {

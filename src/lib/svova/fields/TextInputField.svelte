@@ -1,119 +1,49 @@
 <script module lang="ts">
-	export const createTextField = (name: string, label: string) => {
-		const field = {
+	export function createTextField<T extends boolean>(
+		name: string,
+		label: string,
+		args: {
+			required: T;
+			maxLength?: number;
+			minLength?: number;
+			placeholder?: string;
+			defaultValue?: string;
+			readonly?: boolean;
+			pattern?: string;
+			helpText?: string;
+			hidden?: boolean;
+			asEmail?: boolean;
+			asPassword?: boolean;
+		}
+	) {
+		const elementAttributes = {
+			name: name,
+			id: name,
+			type: 'text'
+		} as Record<string, string>;
+		if (args.maxLength) elementAttributes.maxlength = `${args.maxLength}`;
+		if (args.minLength) elementAttributes.minlength = `${args.minLength}`;
+		if (args.placeholder) elementAttributes.placeholder = args.placeholder;
+		if (args.defaultValue) elementAttributes.value = args.defaultValue;
+		if (args.required) elementAttributes.required = ``;
+		if (args.readonly) elementAttributes.readonly = ``;
+		if (args.pattern) elementAttributes.pattern = args.pattern;
+		if (args.asEmail) elementAttributes.type = `email`;
+		if (args.asPassword) elementAttributes.type = `password`;
+		if (args.hidden) {
+			elementAttributes.hidden = ``;
+			elementAttributes.style = `display: none;`;
+		}
+
+		return {
 			name,
 			label,
-			maxLength: undefined as number | undefined,
-			minLength: undefined as number | undefined,
-			placeholder: undefined as string | undefined,
-			defaultValue: undefined as string | undefined,
-			required: false,
-			readonly: false,
-			pattern: undefined as string | undefined,
-			helpText: undefined as string | undefined,
-			type: `text` as string,
-			exampleValue: 'foo',
-			elementAttributes: {} as Record<string, string>,
-			hidden: false,
-
-			max(length: number) {
-				this.maxLength = length;
-				return this;
-			},
-
-			min(length: number) {
-				this.minLength = length;
-				return this;
-			},
-
-			withPlaceholder(text: string) {
-				this.placeholder = text;
-				return this;
-			},
-
-			withDefaultValue(value: string) {
-				this.defaultValue = value;
-				return this;
-			},
-
-			isRequired() {
-				this.required = true;
-				return this;
-			},
-
-			readOnly() {
-				this.readonly = true;
-				return this;
-			},
-
-			withPattern(regex: string) {
-				this.pattern = regex;
-				return this;
-			},
-
-			withHelpText(text: string) {
-				this.helpText = text;
-				return this;
-			},
-
-			asPassword() {
-				this.type = `password`;
-				return this;
-			},
-
-			asEmail() {
-				this.type = `email`;
-				return this;
-			},
-
-			isHidden() {
-				this.hidden = true;
-				return this;
-			},
-
-			render() {
-				this.elementAttributes = {
-					name: this.name,
-					id: this.name,
-					type: this.type
-				};
-
-				if (this.maxLength) this.elementAttributes.maxlength = `${this.maxLength}`;
-				if (this.minLength) this.elementAttributes.minlength = `${this.minLength}`;
-				if (this.placeholder) this.elementAttributes.placeholder = this.placeholder;
-				if (this.defaultValue) this.elementAttributes.value = this.defaultValue;
-				if (this.required) this.elementAttributes.required = ``;
-				if (this.readonly) this.elementAttributes.readonly = ``;
-				if (this.pattern) this.elementAttributes.pattern = this.pattern;
-				if (this.hidden) {
-					this.elementAttributes.hidden = ``;
-					this.elementAttributes.style = `display: none;`;
-				}
-			},
-
-			build() {
-				this.render();
-				return {
-					name: this.name,
-					label: this.label,
-					maxLength: this.maxLength,
-					minLength: this.minLength,
-					placeholder: this.placeholder,
-					defaultValue: this.defaultValue,
-					required: this.required,
-					readonly: this.readonly,
-					pattern: this.pattern,
-					helpText: this.helpText,
-					type: this.type,
-					exampleValue: this.exampleValue,
-					elementAttributes: this.elementAttributes,
-					hidden: this.hidden
-				};
-			}
+			exampleValue: 'foo' as T extends true ? string : string | null | undefined,
+			type: 'text',
+			elementAttributes,
+			...args
 		};
-
-		return field;
-	};
+	}
 </script>
 
 <script lang="ts">

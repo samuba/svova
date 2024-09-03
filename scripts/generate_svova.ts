@@ -100,15 +100,11 @@ async function generateDefinitionsFile(table: { name: string; columns: { name: s
     await fs.ensureDir(outputDir);
 
     let content = `
-import { extractActionParams, extractFields, finalizeRequest, type FieldsType, type FormSchema, type Loaders } from "$lib/svova/common";
-import { createIdField } from "$lib/svova/fields/IdInputField.svelte";
-import { createNumberField } from "$lib/svova/fields/NumberInputField.svelte";
-import { createTextField } from "$lib/svova/fields/TextInputField.svelte";
-import { createBooleanField } from "$lib/svova/fields/BooleanInputField.svelte";
-import { createDateField } from "$lib/svova/fields/DateInputField.svelte";
-import { type Actions } from "@sveltejs/kit";
+import { extractActionParams, getRoutePathToFile, sleep, type FieldsType, type FormSchema, type Loaders, type Writers } from "$lib/svova/common";
+import { type RequestEvent } from "@sveltejs/kit";
 import * as s from "$lib/server/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, inArray, type Simplify } from "drizzle-orm";
+import { createIdField, createNumberField, createTextField, createBooleanField } from "$lib/svova/fields";
 
 const fields = {
 `;
@@ -121,7 +117,7 @@ const fields = {
             case "number":
             case `integer`:
                 if (fieldName === `id`) {
-                    fieldDefinition = `createIdField().build(),`;
+                    fieldDefinition = `createIdField<number>({ dataType: 'number' }).build(),`;
                 } else {
                     fieldDefinition = `createNumberField(\`${fieldName}\`, \`${fieldName.charAt(0).toUpperCase() + fieldName.slice(1)}\`)
         ${column.mode === `boolean` ? `.asBoolean()` : ``}
@@ -163,49 +159,35 @@ const fields = {
 
 export const formSchema = {
     fields,
-    FieldsType: {} as FieldsType<typeof fields>,
-    path: \`/${tableName}\`
+    FieldsType: {} as Simplify<FieldsType<typeof fields>>,
+    path: getRoutePathToFile(import.meta) // \`/${tableName}\`
 } satisfies FormSchema;
 
 export type FormFields = typeof formSchema.FieldsType;
 
 export const loaders = {
     list: async ({ locals: { db } }) => {
-        return await db.select().from(s.${tableName}).all();
+        return await db.select().from(s.${tableName});
     },
     one: async (id, { locals: { db } }) => {
         return await db.select().from(s.${tableName}).where(eq(s.${tableName}.id, id)).get();
     }
-} satisfies Loaders<typeof formSchema.FieldsType>;
+} satisfies Loaders<typeof formSchema>;
 
 export const writers = {
-    create: async ({ request, locals: { db } }) => {
-        const fields = await extractFields(request, formSchema.fields);
-
+    create: async (fields, { locals: { db } }) => {
         await db.insert(s.${tableName}).values(fields).run();
-
-        await finalizeRequest(request, formSchema);
     },
-    update: async ({ request, locals: { db } }) => {
-        const fields = await extractFields(request, formSchema.fields);
-        const id = parseInt(fields.id as string);
-
-        await db.update(s.${tableName}).set(fields).where(eq(s.${tableName}.id, id)).run();
-
-        await finalizeRequest(request, formSchema);
+    update: async (fields, { locals: { db } }) => {
+        await db.update(s.${tableName}).set(fields).where(eq(s.${tableName}.id, fields.id as number)).run();
     },
-    delete: async ({ request, locals: { db } }) => {
-        const id = (await request.formData()).get('id');
-
-        await db.delete(s.${tableName}).where(eq(s.${tableName}.id, parseInt(id as string))).run();
-
-        await finalizeRequest(request, formSchema);
+    delete: async (id, { locals: { db } }) => {
+        await db.delete(s.${tableName}).where(eq(s.${tableName}.id, id)).run();
     }
-} satisfies Actions;
+} satisfies Writers<typeof formSchema>;
 
-export const actions = [
-    // TODO: Add custom actions if needed
-] as const;
+
+
 `;
 
     await Deno.writeTextFile(outputFile, content);

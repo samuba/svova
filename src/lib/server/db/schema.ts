@@ -5,7 +5,8 @@ export const users = sqliteTable('users', {
 	name: text('name').notNull(),
 	email: text('email').notNull(),
 	password: text('password').notNull(),
-	income: integer('income').notNull()
+	income: integer('income').notNull(),
+	isActive: integer('is_active', { mode: 'boolean' }).notNull().default(true)
 });
 
 export const posts = sqliteTable('posts', {

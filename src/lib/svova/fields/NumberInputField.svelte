@@ -1,108 +1,46 @@
 <script module lang="ts">
-	export const createNumberField = (name: string, label: string) => {
-		const field = {
+	export function createNumberField<T extends boolean>(
+		name: string,
+		label: string,
+		args: {
+			min?: number;
+			max?: number;
+			step?: number;
+			placeholder?: string;
+			defaultValue?: number;
+			required: T;
+			readonly?: boolean;
+			hidden?: boolean;
+			helpText?: string;
+		}
+	) {
+		const elementAttributes = {
+			name,
+			id: name,
+			type: 'number'
+		} as Record<string, string>;
+
+		if (args.min !== undefined) elementAttributes.min = `${args.min}`;
+		if (args.max !== undefined) elementAttributes.max = `${args.max}`;
+		if (args.step !== undefined) elementAttributes.step = `${args.step}`;
+		if (args.placeholder) elementAttributes.placeholder = args.placeholder;
+		if (args.defaultValue !== undefined) elementAttributes.value = `${args.defaultValue}`;
+		if (args.required) elementAttributes.required = ``;
+		if (args.readonly) elementAttributes.readonly = ``;
+		if (args.hidden) {
+			elementAttributes.hidden = ``;
+			elementAttributes.style = `display: none;`;
+		}
+
+		return {
 			name,
 			label,
-			min: undefined as number | undefined,
-			max: undefined as number | undefined,
-			step: undefined as number | undefined,
-			placeholder: undefined as string | undefined,
-			defaultValue: undefined as number | undefined,
-			required: false,
-			readonly: false,
-			hidden: false,
-			helpText: undefined as string | undefined,
-			exampleValue: 9000,
-			elementAttributes: {} as Record<string, string>,
+			exampleValue: 9000 as T extends true ? number : number | null | undefined,
 			type: 'number',
-
-			withMin(value: number) {
-				this.min = value;
-				return this;
-			},
-
-			withMax(value: number) {
-				this.max = value;
-				return this;
-			},
-
-			withStep(value: number) {
-				this.step = value;
-				return this;
-			},
-
-			withPlaceholder(text: string) {
-				this.placeholder = text;
-				return this;
-			},
-
-			withDefaultValue(value: number) {
-				this.defaultValue = value;
-				return this;
-			},
-
-			isRequired() {
-				this.required = true;
-				return this;
-			},
-
-			readOnly() {
-				this.readonly = true;
-				return this;
-			},
-
-			isHidden() {
-				this.hidden = true;
-				return this;
-			},
-
-			withHelpText(text: string) {
-				this.helpText = text;
-				return this;
-			},
-
-			render() {
-				this.elementAttributes = {
-					name: this.name,
-					id: this.name,
-					type: `number`
-				};
-				if (this.min !== null) this.elementAttributes.min = `${this.min}`;
-				if (this.max !== null) this.elementAttributes.max = `${this.max}`;
-				if (this.step !== null) this.elementAttributes.step = `${this.step}`;
-				if (this.placeholder) this.elementAttributes.placeholder = this.placeholder;
-				if (this.defaultValue !== null) this.elementAttributes.value = `${this.defaultValue}`;
-				if (this.required) this.elementAttributes.required = ``;
-				if (this.readonly) this.elementAttributes.readonly = ``;
-				if (this.hidden) {
-					this.elementAttributes.hidden = ``;
-					this.elementAttributes.style = `display: none;`;
-				}
-			},
-
-			build() {
-				this.render();
-				return {
-					name: this.name,
-					label: this.label,
-					min: this.min,
-					max: this.max,
-					step: this.step,
-					placeholder: this.placeholder,
-					defaultValue: this.defaultValue,
-					required: this.required,
-					readonly: this.readonly,
-					hidden: this.hidden,
-					helpText: this.helpText,
-					exampleValue: this.exampleValue,
-					elementAttributes: this.elementAttributes,
-					type: this.type
-				};
-			}
+			elementAttributes,
+			...args
 		};
-
-		return field;
-	};
+	}
 </script>
 
 <script lang="ts">

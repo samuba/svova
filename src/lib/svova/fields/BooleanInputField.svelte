@@ -1,95 +1,63 @@
 <script module lang="ts">
-	export const createBooleanField = (name: string, label: string) => {
-		const field = {
+	export function createBooleanField(
+		name: string,
+		label: string,
+		args: {
+			defaultValue?: boolean;
+			readonly?: boolean;
+			hidden?: boolean;
+			helpText?: string;
+		}
+	) {
+		args.defaultValue = args.defaultValue ?? false;
+
+		const elementAttributes = {
+			type: 'checkbox'
+		} as Record<string, string>;
+
+		if (args.defaultValue) elementAttributes.checked = `${args.defaultValue}`;
+		if (args.readonly) elementAttributes.readonly = ``;
+		if (args.hidden) {
+			elementAttributes.hidden = ``;
+			elementAttributes.style = `display: none;`;
+		}
+
+		return {
 			name,
 			label,
-			defaultValue: false,
-			required: false,
-			readonly: false,
-			hidden: false,
-			helpText: undefined as string | undefined,
 			exampleValue: true,
-			elementAttributes: {} as Record<string, string>,
-			type: `checkbox`,
-
-			withDefaultValue(value: boolean) {
-				this.defaultValue = value;
-				return this;
-			},
-
-			isRequired() {
-				this.required = true;
-				return this;
-			},
-
-			readOnly() {
-				this.readonly = true;
-				return this;
-			},
-
-			isHidden() {
-				this.hidden = true;
-				return this;
-			},
-
-			withHelpText(text: string) {
-				this.helpText = text;
-				return this;
-			},
-
-			render() {
-				this.elementAttributes = {
-					name: this.name,
-					id: this.name,
-					type: this.type
-				};
-
-				if (this.defaultValue) this.elementAttributes.checked = ``;
-				if (this.required) this.elementAttributes.required = ``;
-				if (this.readonly) this.elementAttributes.readonly = ``;
-				if (this.hidden) {
-					this.elementAttributes.hidden = ``;
-					this.elementAttributes.style = `display: none;`;
-				}
-			},
-
-			build() {
-				this.render();
-				return {
-					name: this.name,
-					label: this.label,
-					defaultValue: this.defaultValue,
-					required: this.required,
-					readonly: this.readonly,
-					hidden: this.hidden,
-					helpText: this.helpText,
-					exampleValue: this.exampleValue,
-					elementAttributes: this.elementAttributes,
-					type: this.type
-				};
-			}
+			type: 'checkbox',
+			elementAttributes,
+			value: args.defaultValue,
+			...args
 		};
-
-		return field;
-	};
+	}
 </script>
 
 <script lang="ts">
 	import type { InputFieldProps } from '$lib/svova/common';
 
 	let { attributes, name, label, helpText, value = $bindable() }: InputFieldProps = $props();
+
+	const labelId = `${name}-` + crypto.randomUUID();
 </script>
 
 <div class="flex items-center">
 	<input
 		type="checkbox"
-		{name}
+		id={labelId}
 		{...attributes}
 		bind:checked={value}
 		class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
 	/>
-	<label for={name} class="ml-2 block text-sm font-medium leading-6 text-gray-900">{label}</label>
+	<label for={labelId} class="ml-2 block text-sm font-medium leading-6 text-gray-900">{label}</label
+	>
+
+	<!-- see https://stackoverflow.com/questions/3746678/force-a-checkbox-to-always-submit-even-when-unchecked -->
+	<input type="hidden" {name} value={value ? 'true' : 'false'} />
 </div>
 {#if helpText}
 	<p class="mt-2 text-sm text-gray-500">{helpText}</p>
 {/if}
+
+{JSON.stringify(value)}

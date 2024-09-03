@@ -1,4 +1,4 @@
-import { redirect, type RequestEvent } from '@sveltejs/kit';
+import { error, redirect, type RequestEvent } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import { writers, formSchema, loaders, actions as svovaActions } from '../definitions';
 import { extractFields } from '$lib/svova/common';
@@ -12,8 +12,9 @@ export const load = (async (event) => {
     if (view === 'create') {
         // nothing to do
     } else if (view.match(/\d/)) {
-        const id = typeof formSchema.fields.id.exampleValue === 'number' ? parseInt(view) : view
+        const id: any = typeof formSchema.fields.id.exampleValue === 'number' ? parseInt(view) : view
         one = await loaders.one(id, event);
+        if (!one) error(404)
     } else if (view === 'list') {
         all = await loaders.list(event);
     } else {
