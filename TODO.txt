@@ -1,4 +1,4 @@
-finish new input fields structure
 pagination in table
 global search
 server validation (zod?)
+foreign keys
