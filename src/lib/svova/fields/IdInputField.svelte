@@ -6,13 +6,17 @@
 		name?: string;
 	}) {
 		args.name = args.name ?? 'id';
+		args.readonly = args.readonly ?? true;
+
 		const elementAttributes = {
 			name: args.name,
 			id: args.name,
 			type: 'text'
 		} as Record<string, string>;
 
-		if (args.readonly) elementAttributes.readonly = `true`;
+		if (args.readonly) {
+			elementAttributes.readonly = `true`;
+		}
 		if (args.hidden) {
 			elementAttributes.hidden = `true`;
 			elementAttributes.style = `display: none;`;
@@ -37,10 +41,17 @@
 	let { attributes, name, label, helpText, value = $bindable() }: InputFieldProps = $props();
 </script>
 
-<input
-	type="text"
-	{name}
-	{...attributes}
-	bind:value
-	class="block w-full rounded-md border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-/>
+<div>
+	<label for={name} class="block text-sm font-medium leading-6 text-gray-900">ID</label>
+	<div class="mt-2">
+		<input
+			type="text"
+			{name}
+			{...attributes}
+			bind:value
+			class="{attributes.readonly
+				? 'bg-gray-100'
+				: ''} block w-full rounded-md border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+		/>
+	</div>
+</div>

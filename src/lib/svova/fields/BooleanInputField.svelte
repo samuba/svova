@@ -59,5 +59,3 @@
 {#if helpText}
 	<p class="mt-2 text-sm text-gray-500">{helpText}</p>
 {/if}
-
-{JSON.stringify(value)}

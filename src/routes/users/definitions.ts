@@ -1,4 +1,4 @@
-import { extractActionParams, getRoutePathToFile, sleep, type FieldsType, type FormSchema, type Loaders, type Writers } from "$lib/svova/common";
+import { extractActionParams, getRoutePathToFile, type FieldsType, type FormSchema, type Loaders, type Writers } from "$lib/svova/common";
 import { type RequestEvent } from "@sveltejs/kit";
 import * as s from "$lib/server/db/schema";
 import { eq, inArray, type Simplify } from "drizzle-orm";
@@ -55,7 +55,6 @@ export const actions = [
                 const models = db.select().from(s.users).where(inArray(s.users.id, modelIds)).all();
 
                 console.log(`executing resendRegistrationEmail. title=${title} models=`, models);
-                await sleep(500);
             }
         },
     },
@@ -69,7 +68,6 @@ export const actions = [
                 const models = db.select().from(s.users).where(inArray(s.users.id, modelIds)).all();
 
                 console.log(`executing blow candles.  models=`, models);
-                await sleep(500);
             }
         },
     }
@@ -95,12 +93,11 @@ export const loaders = {
 
 export const writers = {
     create: async (fields, { locals: { db } }) => {
-        console.log(`creating user with fields=`, fields);
         await db.insert(s.users).values(fields).run();
     },
     update: async (fields, { locals: { db } }) => {
         console.log(`updating user with fields=`, fields);
-        await db.update(s.users).set(fields).where(eq(s.users.id, fields.id as number)).run();
+        await db.update(s.users).set(fields).where(eq(s.users.id, fields.id)).run();
     },
     delete: async (id, { locals: { db } }) => {
         await db.delete(s.users).where(eq(s.users.id, id)).run();

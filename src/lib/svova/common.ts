@@ -30,7 +30,6 @@ export async function extractFields<T extends FormSchemaFields>(request: Request
     const data = await request.clone().formData();
     const fields = {} as Record<string, unknown>;
     for (const [key, value] of data.entries()) {
-        console.log({ key, value, schemaFields });
         if (key === "modelIds") {
             fields[key] = JSON.parse(value.toString());
         } else if (typeof schemaFields[key].exampleValue === "string") {
