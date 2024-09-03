@@ -15,7 +15,7 @@
 			type: 'checkbox'
 		} as Record<string, string>;
 
-		if (args.defaultValue) elementAttributes.checked = `${args.defaultValue}`;
+		if (args.defaultValue) elementAttributes.checked = ``;
 		if (args.readonly) elementAttributes.readonly = ``;
 		if (args.hidden) {
 			elementAttributes.hidden = ``;

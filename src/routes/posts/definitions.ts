@@ -13,7 +13,7 @@ const fields = {
         helpText: `Please provide title`,
     }),
     published: createBooleanField(`published`, `Is Published`, {
-        defaultValue: false,
+        defaultValue: true,
     }),
     text: createTextField(`text`, `Text`, {
         required: false,
